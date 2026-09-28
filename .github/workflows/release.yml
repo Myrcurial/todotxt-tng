@@ -1,0 +1,57 @@
+name: Release
+
+# Push a tag like v0.2.0 to build, check, and publish a release with a DMG.
+# "Run workflow" on the Actions tab makes a test build (DMG as an artifact, no release).
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # bundle.sh uses the commit count as the build number
+
+      - name: Toolchain
+        run: |
+          sw_vers
+          swift --version
+
+      - name: Version
+        id: version
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then v="${GITHUB_REF_NAME#v}"; else v="0.0.0-dev.${GITHUB_RUN_NUMBER}"; fi
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+
+      - name: Checks
+        run: scripts/check.sh
+
+      - name: Build app and DMG
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          scripts/dmg.sh
+          shasum -a 256 build/*.dmg | tee build/SHA256SUMS.txt
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TodoTxtTNG-${{ steps.version.outputs.version }}
+          path: |
+            build/*.dmg
+            build/SHA256SUMS.txt
+
+      - name: Publish release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" build/*.dmg build/SHA256SUMS.txt \
+            --title "todotxt-tng ${GITHUB_REF_NAME#v}" --generate-notes \
+            --notes "Unsigned build: on first launch, right-click the app and choose Open (or allow it in System Settings → Privacy & Security)."

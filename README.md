@@ -43,6 +43,21 @@ scripts/check.sh               # run the TodoTxtCore checks (exits non-zero on f
 scripts/bundle.sh --open       # build build/TodoTxtTNG.app, sign it ad hoc, and launch it
 ```
 
+## Releases
+
+Download the DMG from [Releases](https://github.com/Myrcurial/todotxt-tng/releases), open it,
+and drag **TodoTxtTNG** to **Applications**. Builds are ad-hoc signed, not notarized, so on first
+launch right-click the app and choose **Open**.
+
+To publish a release, push a version tag. GitHub Actions runs the checks, builds the DMG and
+attaches it to a new release:
+
+```sh
+git tag v0.2.0 && git push origin v0.2.0
+```
+
+`VERSION=0.2.0 scripts/dmg.sh` builds the same DMG locally.
+
 ## Layout
 
 | Target | Purpose |
