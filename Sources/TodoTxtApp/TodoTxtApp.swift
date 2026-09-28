@@ -18,5 +18,10 @@ struct TodoTxtApp: App {
                     .keyboardShortcut("o")
             }
         }
+
+        Settings {
+            SettingsView()
+                .environment(model)
+        }
     }
 }

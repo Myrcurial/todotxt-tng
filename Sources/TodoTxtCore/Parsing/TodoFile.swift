@@ -72,6 +72,23 @@ public struct TodoFile: Hashable, Sendable {
         tasks.append(t)
     }
 
+    /// The whole file in standard form: every task normalized, blank lines removed,
+    /// LF line endings, no BOM, and a final newline.
+    public func normalized() -> TodoFile {
+        TodoFile(tasks: tasks.filter { !$0.isBlank }.map { $0.normalized() },
+                 hasBOM: false, endsWithNewline: true, prefersCRLF: false)
+    }
+
+    /// How many lines standardizing would change (rewritten plus removed), and whether
+    /// the line endings, BOM or final newline would change too.
+    public var normalizationChanges: (lines: Int, fileFormat: Bool) {
+        let lines = tasks.reduce(0) { n, t in
+            n + ((t.isBlank || t.normalized().line != t.line) ? 1 : 0)
+        }
+        let format = hasBOM || !endsWithNewline || tasks.contains(where: \.endsWithCR)
+        return (lines, format)
+    }
+
     /// Carries in-memory IDs over from an earlier load. Lines are matched by raw text,
     /// in order, so duplicate lines pair off one to one. Unmatched lines keep new IDs.
     public func adoptingIdentities(from old: TodoFile) -> TodoFile {

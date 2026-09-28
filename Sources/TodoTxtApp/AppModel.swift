@@ -151,6 +151,10 @@ final class AppModel {
         run { try $0.update(id) { $0.setPriority(p) } }
     }
 
+    func rewriteInStandardFormat() {
+        run { try $0.rewriteInStandardFormat() }
+    }
+
     private func run(_ action: (TodoStore) throws -> Void) {
         guard let store else { return }
         do {

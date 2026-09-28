@@ -14,5 +14,6 @@ MainActor.assumeIsolated {
     extensionChecks()
     queryChecks()
     storeChecks()
+    normalizeChecks()
     CheckRunner.shared.finish()
 }

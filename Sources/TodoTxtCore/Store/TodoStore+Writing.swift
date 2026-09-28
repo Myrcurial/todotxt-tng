@@ -23,6 +23,12 @@ extension TodoStore {
         }
     }
 
+    /// Rewrites the whole file in standard form (see `TodoFile.normalized()`).
+    /// Runs against the latest version on disk, like every other edit.
+    public func rewriteInStandardFormat() throws(StoreError) {
+        try transact { $0 = $0.normalized() }
+    }
+
     public func delete(_ id: TodoTask.ID) throws(StoreError) {
         try transact { f throws(StoreError) in
             guard let i = f.tasks.firstIndex(where: { $0.id == id }) else { throw .conflict }

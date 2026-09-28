@@ -131,6 +131,18 @@ public struct TodoTask: Identifiable, Hashable, Sendable {
         isModified = true
     }
 
+    /// This task in the spec's standard form: fields in order, single spaces, no
+    /// leading or trailing whitespace, and a priority on a completed task moved to `pri:`.
+    /// An inferred completion date is not written; only dates already in the file are used.
+    public func normalized() -> TodoTask {
+        var t = self
+        t.body = body.todoWords.joined(separator: " ")
+        t.isModified = true
+        var n = TodoTask(line: t.line, id: id)
+        n.inferredCompletionDate = inferredCompletionDate
+        return n
+    }
+
     private mutating func appendWord(_ w: String) {
         body = body.todoWords.isEmpty ? w : body.trimmingTrailingWhitespace + " " + w
         isModified = true
