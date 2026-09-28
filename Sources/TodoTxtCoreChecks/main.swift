@@ -15,5 +15,6 @@ MainActor.assumeIsolated {
     queryChecks()
     storeChecks()
     normalizeChecks()
+    draftChecks()
     CheckRunner.shared.finish()
 }
