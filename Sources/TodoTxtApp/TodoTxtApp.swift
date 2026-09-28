@@ -12,6 +12,10 @@ struct TodoTxtApp: App {
         }
         .commands {
             CommandGroup(replacing: .newItem) {
+                Button("New Task…") { model.showingNewTask = true }
+                    .keyboardShortcut("n")
+                    .disabled(model.store == nil)
+                Divider()
                 Button("New todo.txt…") { model.showNewPanel() }
                     .keyboardShortcut("n", modifiers: [.command, .shift])
                 Button("Open todo.txt…") { model.showOpenPanel() }

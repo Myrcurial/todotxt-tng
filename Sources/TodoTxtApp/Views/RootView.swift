@@ -11,6 +11,16 @@ struct RootView: View {
                 TaskListView()
             }
             .navigationSubtitle(store.url.lastPathComponent)
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button("New Task", systemImage: "plus") { model.showingNewTask = true }
+                        .help("New Task (⌘N)")
+                }
+            }
+            .sheet(isPresented: Binding(get: { model.showingNewTask }, set: { model.showingNewTask = $0 })) {
+                NewTaskView(vocabulary: model.vocabulary, initial: model.selection)
+                    .environment(model)
+            }
         } else {
             WelcomeView()
         }

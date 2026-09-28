@@ -135,9 +135,13 @@ final class AppModel {
 
     // MARK: Actions
 
-    func add(_ text: String) {
-        run { try $0.add(AddTaskCommand(text: text)) }
+    var showingNewTask = false
+
+    func add(_ text: String, addCreationDate: Bool = true) {
+        run { try $0.add(AddTaskCommand(text: text, addCreationDate: addCreationDate)) }
     }
+
+    var vocabulary: TaskVocabulary { TaskVocabulary(tasks: store?.file.tasks ?? []) }
 
     func toggle(_ id: TodoTask.ID) {
         run { try $0.toggleCompletion(id) }
