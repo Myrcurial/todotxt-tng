@@ -1,10 +1,10 @@
+import AppKit
 import SwiftUI
 import TodoTxtCore
 
 /// Settings window (⌘,).
 struct SettingsView: View {
     @Environment(AppModel.self) private var model
-    @State private var confirming = false
 
     var body: some View {
         Form {
@@ -17,7 +17,7 @@ struct SettingsView: View {
                 }
                 LabeledContent("Standard format") {
                     VStack(alignment: .trailing, spacing: 4) {
-                        Button("Rewrite in Standard Format…") { confirming = true }
+                        Button("Rewrite in Standard Format…") { confirmRewrite() }
                             .disabled(!needsRewrite)
                         Text(summary).font(.caption).foregroundStyle(.secondary)
                     }
@@ -35,12 +35,20 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .frame(width: 520)
         .fixedSize(horizontal: false, vertical: true)
-        .confirmationDialog("Rewrite the whole file?", isPresented: $confirming) {
-            Button("Rewrite \(model.store?.url.lastPathComponent ?? "File")", role: .destructive) {
-                model.rewriteInStandardFormat()
-            }
-        } message: {
-            Text("\(summary). Other todo.txt tools will still read it, but this can't be undone from the app.")
+    }
+
+    /// A standard modal alert. More reliable than confirmationDialog inside a
+    /// Settings form, and visible to VoiceOver and AppleScript.
+    private func confirmRewrite() {
+        let alert = NSAlert()
+        alert.alertStyle = .warning
+        alert.messageText = "Rewrite the whole file?"
+        alert.informativeText = "\(summary). Other todo.txt tools will still read it, but this can't be undone from the app."
+        alert.addButton(withTitle: "Rewrite \(model.store?.url.lastPathComponent ?? "File")")
+        alert.addButton(withTitle: "Cancel")
+        alert.buttons.first?.hasDestructiveAction = true
+        if alert.runModal() == .alertFirstButtonReturn {
+            model.rewriteInStandardFormat()
         }
     }
 
